@@ -1,0 +1,66 @@
+/* Tournament Layout & Pure CSS Connecting Lines */
+.round-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    position: relative;
+    width: 240px;
+    height: 100%;
+}
+
+.match-box {
+    position: relative;
+    background: #18181c;
+    border: 1px solid #2e2e38;
+    border-radius: 4px;
+    width: 220px;
+    z-index: 10;
+}
+
+/* Horizontal line leaving the right side of every match */
+.match-box::after {
+    content: '';
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    width: 20px;
+    height: 2px;
+    background-color: #4b5563; 
+}
+
+/* Hide outgoing line on the final championship node */
+.final-champ-node::after { 
+    display: none; 
+}
+
+/* Vertical line bracket on the LEFT side of every match box (except first column) */
+.round-column:not(:first-child) .match-box::before {
+    content: '';
+    position: absolute;
+    left: -20px;
+    top: -50%;
+    bottom: -50%;
+    width: 2px;
+    background-color: #4b5563;
+    z-index: 1;
+}
+
+/* Adjust the left brackets to center cleanly around pairings */
+.round-column:not(:first-child) .match-box:nth-child(odd)::before {
+    top: 50%;
+    bottom: -50%;
+    height: calc(100% + 20px); 
+    border-top: 2px solid #4b5563;
+    border-left: 2px solid #4b5563;
+    background: none;
+}
+
+.round-column:not(:first-child) .match-box:nth-child(even)::before {
+    top: -50%;
+    bottom: 50%;
+    height: calc(100% + 20px);
+    border-bottom: 2px solid #4b5563;
+    border-left: 2px solid #4b5563;
+    background: none;
+    transform: translateY(-50%);
+}
