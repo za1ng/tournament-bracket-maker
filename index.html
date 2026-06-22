@@ -1,128 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Siege Tournament Bracket</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>Image Bracket Generator</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
-
 <body>
+  <div class="app-container">
+    <h1>Image Bracket Generator</h1>
 
-<div class="topbar">
-    <h2>Bracket HQ</h2>
-    <span>Hangover Siege 1v1 Tournament</span>
-</div>
-
-
-<div class="bracket">
-
-    <div class="round">
-
-        <div class="match">
-            <player-card id="p1"></player-card>
-            <player-card id="p16"></player-card>
+    <section class="input-section">
+      <h2>Add Players</h2>
+      <form id="player-form">
+        <div class="form-row">
+          <label>Player Name</label>
+          <input type="text" id="player-name" required />
         </div>
-
-        <div class="match">
-            <player-card id="p8"></player-card>
-            <player-card id="p9"></player-card>
+        <div class="form-row">
+          <label>Image URL</label>
+          <input type="url" id="player-image" placeholder="https://example.com/image.jpg" required />
         </div>
+        <button type="submit">Add Player</button>
+      </form>
 
-        <div class="match">
-            <player-card id="p5"></player-card>
-            <player-card id="p12"></player-card>
-        </div>
+      <div class="player-list-container">
+        <h3>Players</h3>
+        <ul id="player-list"></ul>
+      </div>
 
-        <div class="match">
-            <player-card id="p4"></player-card>
-            <player-card id="p13"></player-card>
-        </div>
+      <button id="generate-bracket" class="generate-btn">Generate Bracket</button>
+    </section>
 
+    <section class="bracket-section">
+      <h2>Bracket</h2>
+      <div id="bracket-container"></div>
+    </section>
+  </div>
 
-        <div class="match">
-            <player-card id="p3"></player-card>
-            <player-card id="p14"></player-card>
-        </div>
-
-
-        <div class="match">
-            <player-card id="p6"></player-card>
-            <player-card id="p11"></player-card>
-        </div>
-
-
-        <div class="match">
-            <player-card id="p7"></player-card>
-            <player-card id="p10"></player-card>
-        </div>
-
-
-        <div class="match">
-            <player-card id="p2"></player-card>
-            <player-card id="p15"></player-card>
-        </div>
-
-
-    </div>
-
-
-    <div class="round second">
-
-        <div class="match">
-            <div class="slot"></div>
-            <div class="slot"></div>
-        </div>
-
-        <div class="match">
-            <div class="slot"></div>
-            <div class="slot"></div>
-        </div>
-
-
-        <div class="match">
-            <div class="slot"></div>
-            <div class="slot"></div>
-        </div>
-
-
-        <div class="match">
-            <div class="slot"></div>
-            <div class="slot"></div>
-        </div>
-
-    </div>
-
-
-
-    <div class="round third">
-
-        <div class="match">
-            <div class="slot"></div>
-            <div class="slot"></div>
-        </div>
-
-        <div class="match">
-            <div class="slot"></div>
-            <div class="slot"></div>
-        </div>
-
-    </div>
-
-
-    <div class="final">
-
-        <div class="match">
-            <div class="slot"></div>
-            <div class="slot"></div>
-        </div>
-
-    </div>
-
-
-
-</div>
-
-
-<script src="script.js"></script>
-
+  <script src="script.js"></script>
 </body>
 </html>
