@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Bracket Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom bracket lines styling */
+        .match-connector {
+            position: relative;
+        }
+        .match-connector::after {
+            content: '';
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            width: 20px;
+            height: 2px;
+            background-color: #4b5563; /* Gray lines */
+        }
+    </style>
+</head>
+<body class="bg-[#1e1e24] text-gray-100 min-h-screen font-sans flex flex-col">
+
+    <header class="bg-[#18181c] border-b border-gray-800 p-4 flex justify-between items-center shadow-md">
+        <h1 class="text-xl font-bold tracking-wide text-white">Bracket<span class="text-blue-500">HQ</span> Clone</h1>
+        <span class="text-sm text-gray-400">Image Upload Enabled</span>
+    </header>
+
+    <div class="flex flex-1 flex-col lg:flex-row">
+        <aside class="w-full lg:w-80 bg-[#18181c] p-6 border-r border-gray-800 flex flex-col gap-6">
+            <div>
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-2">1. Add Participants</h2>
+                <div class="flex flex-col gap-2">
+                    <input type="text" id="playerName" placeholder="Player/Team Name" class="bg-[#26262b] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-blue-500">
+                    
+                    <label class="bg-[#26262b] border border-gray-700 rounded p-2 text-center cursor-pointer hover:bg-gray-800 transition text-sm text-gray-300">
+                        <span>📸 Upload Image</span>
+                        <input type="file" id="playerImage" accept="image/*" class="hidden">
+                    </label>
+                    <div id="imagePreview" class="text-xs text-green-400 hidden text-center">✓ Image staged</div>
+
+                    <button id="addPlayerBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium p-2 rounded transition mt-2">Add Player</button>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-2">Current Roster (<span id="playerCount">0</span>)</h2>
+                <ul id="rosterList" class="bg-[#131316] rounded p-2 max-h-48 overflow-y-auto border border-gray-800 divide-y divide-gray-800">
+                    </ul>
+            </div>
+
+            <button id="generateBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold p-3 rounded shadow transition w-full mt-auto">Generate Bracket</button>
+        </aside>
+
+        <main class="flex-1 p-8 overflow-auto flex items-center justify-start bg-[#121214] min-h-[500px]">
+            <div id="bracketDisplay" class="flex items-center gap-16 min-w-max">
+                <p class="text-gray-500 italic text-center w-full">Add players on the left and click "Generate Bracket" to begin.</p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let players = [];
+        let stagedImageBase64 = null;
+
+        // Handle Image Upload -> Base64 Conversion for local storage preview
+        document.getElementById('playerImage').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    stagedImageBase64 = event.target.result;
+                    document.getElementById('imagePreview').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Add player to local roster array
+        document.getElementById('addPlayerBtn').addEventListener('click', () => {
+            const nameInput = document.getElementById('playerName');
+            const name = nameInput.value.trim();
+
+            if (!name) return alert("Please enter a name!");
+
+            players.push({
+                id: players.length + 1,
+                name: name,
+                image: stagedImageBase64 || "https://via.placeholder.com/40" // Fallback placeholder
+            });
+
+            // Reset inputs
+            nameInput.value = "";
+            stagedImageBase64 = null;
+            document.getElementById('imagePreview').classList.add('hidden');
+            document.getElementById('playerImage').value = "";
+
+            updateRosterUI();
+        });
+
+        function updateRosterUI() {
+            const list = document.getElementById('rosterList');
+            const count = document.getElementById('playerCount');
+            list.innerHTML = "";
+            count.innerText = players.length;
+
+            players.forEach(p => {
+                const li = document.createElement('li');
+                li.className = "flex items-center gap-3 p-2 text-sm";
+                li.innerHTML = `<img src="${p.image}" class="w-6 h-6 rounded-full object-cover border border-gray-600"> <span>${p.name}</span>`;
+                list.appendChild(li);
+            });
+        }
+
+        // --- AUTOMATIC BYE & BRACKET MATH LOGIC ---
+        document.getElementById('generateBtn').addEventListener('click', () => {
+            if (players.length < 2) return alert("You need at least 2 players to build a tournament!");
+
+            const N = players.length;
+            // 1. Calculate next power of 2
+            let nextPowerOfTwo = 1;
+            while (nextPowerOfTwo < N) {
+                nextPowerOfTwo *= 2;
+            }
+
+            const totalByes = nextPowerOfTwo - N;
+            const prelimPlayersCount = N - totalByes;
+
+            // Clone array to manipulate
+            let pool = [...players];
+            
+            // Extract players who will play in Round 0 (Prelims)
+            let round0Matches = [];
+            // Take from the bottom of the seed list for prelims
+            let prelimPlayers = pool.splice(totalByes); 
+
+            for(let i = 0; i < prelimPlayers.length; i += 2) {
+                round0Matches.push({
+                    p1: prelimPlayers[i],
+                    p2: prelimPlayers[i+1] || null
+                });
+            }
+
+            // The remaining players in pool automatically get a Bye into Round 1
+            let round1Slots = [...pool];
+
+            renderBracketUI(round0Matches, round1Slots, nextPowerOfTwo);
+        });
+
+        // Dynamic rendering layout engine
+        function renderBracketUI(r0Matches, r1Slots, bracketSize) {
+            const container = document.getElementById('bracketDisplay');
+            container.innerHTML = ""; // Clear initial message
+
+            // COLUMN 1: Round 0 (Prelims) - Rendered only if there are prelim matches
+            if (r0Matches.length > 0) {
+                const r0Column = document.createElement('div');
+                r0Column.className = "flex flex-col justify-around h-full gap-8";
+                
+                r0Matches.forEach(match => {
+                    const matchEl = document.createElement('div');
+                    matchEl.className = "bg-[#18181c] border border-gray-800 rounded w-48 shadow-lg match-connector";
+                    matchEl.innerHTML = `
+                        <div class="flex items-center gap-2 p-2 border-b border-gray-800 hover:bg-gray-800 cursor-pointer rounded-t" onclick="advancePlayer(this, 'r1')">
+                            <img src="${match.p1.image}" class="w-6 h-6 rounded object-cover">
+                            <span class="text-xs truncate">${match.p1.name}</span>
+                        </div>
+                        <div class="flex items-center gap-2 p-2 hover:bg-gray-800 cursor-pointer rounded-b" onclick="advancePlayer(this, 'r1')">
+                            <img src="${match.p2.image}" class="w-6 h-6 rounded object-cover">
+                            <span class="text-xs truncate">${match.p2.name}</span>
+                        </div>
+                    `;
+                    r0Column.appendChild(matchEl);
+                });
+                container.appendChild(r0Column);
+            }
+
+            // COLUMN 2: Round 1 (The Main Bracket Setup)
+            const r1Column = document.createElement('div');
+            r1Column.className = "flex flex-col justify-around h-full gap-16 py-4";
+            
+            // Build the main target structural size slots (e.g., 4, 8, or 16 slots)
+            const totalMatchesInR1 = bracketSize / 2;
+            let byeIndex = 0;
+
+            for (let i = 0; i < totalMatchesInR1; i++) {
+                const matchEl = document.createElement('div');
+                matchEl.className = "bg-[#18181c] border border-gray-800 rounded w-48 shadow-lg match-connector";
+                
+                // If this position gets a Bye player, pre-fill them. Otherwise leave open for Prelim Winners
+                let slot1Html = `<div class="text-xs text-gray-500 p-2 italic">Waiting...</div>`;
+                if (byeIndex < r1Slots.length) {
+                    let p = r1Slots[byeIndex++];
+                    slot1Html = `
+                        <div class="flex items-center gap-2 p-2 border-b border-gray-800 hover:bg-gray-800 cursor-pointer rounded-t" onclick="advancePlayer(this, 'r2')">
+                            <img src="${p.image}" class="w-6 h-6 rounded object-cover">
+                            <span class="text-xs font-semibold">${p.name}</span>
+                        </div>`;
+                }
+
+                matchEl.innerHTML = `
+                    ${slot1Html}
+                    <div class="flex items-center gap-2 p-2 hover:bg-gray-800 cursor-pointer rounded-b text-xs text-gray-500 italic" onclick="advancePlayer(this, 'r2')">
+                        <span>Winner from Prelim</span>
+                    </div>
+                `;
+                r1Column.appendChild(matchEl);
+            }
+            container.appendChild(r1Column);
+
+            // COLUMN 3 & BEYOND: Dynamic Future Elimination Rounds
+            let remainingSlots = totalMatchesInR1;
+            while (remainingSlots > 1) {
+                remainingSlots /= 2;
+                const nextColumn = document.createElement('div');
+                nextColumn.className = "flex flex-col justify-around h-full gap-32 py-8";
+                
+                for (let i = 0; i < remainingSlots; i++) {
+                    const matchEl = document.createElement('div');
+                    matchEl.className = "bg-[#18181c] border border-gray-800 rounded w-48 shadow-lg " + (remainingSlots > 1 ? "match-connector" : "");
+                    matchEl.innerHTML = `
+                        <div class="flex items-center gap-2 p-2 border-b border-gray-800 hover:bg-gray-800 cursor-pointer text-xs text-gray-600 italic" onclick="advancePlayer(this, 'next')">TBD</div>
+                        <div class="flex items-center gap-2 p-2 hover:bg-gray-800 cursor-pointer text-xs text-gray-600 italic" onclick="advancePlayer(this, 'next')">TBD</div>
+                    `;
+                    nextColumn.appendChild(matchEl);
+                }
+                container.appendChild(nextColumn);
+            }
+
+            // Final Winner Bar
+            const winnerCol = document.createElement('div');
+            winnerCol.className = "flex items-center";
+            winnerCol.innerHTML = `<div id="finalWinnerSlot" class="border-b border-blue-500 text-blue-400 font-bold px-4 py-2 uppercase text-sm tracking-widest">🏆 Winner</div>`;
+            container.appendChild(winnerCol);
+        }
+
+        // Quick simulation click action to advance a player to the next match column visually
+        window.advancePlayer = function(element, stage) {
+            const pName = element.querySelector('span')?.innerText;
+            const pImg = element.querySelector('img')?.src;
+            if (!pName || pName.includes("Winner")) return;
+
+            // Simple traversal tool: Find the next column to push the winner into
+            const currentColumn = element.closest('div').parentElement.parentElement;
+            const nextColumn = currentColumn.nextElementSibling;
+            
+            if (nextColumn && nextColumn.querySelector('#finalWinnerSlot')) {
+                document.getElementById('finalWinnerSlot').innerHTML = `${pName}`;
+                return;
+            }
+
+            if (nextColumn) {
+                // Find empty slots in the next bracket round column and fill them
+                const slots = nextColumn.querySelectorAll('div.italic, text-gray-600, div.cursor-pointer');
+                for (let slot of slots) {
+                    if (slot.innerText === "Waiting..." || slot.innerText === "Winner from Prelim" || slot.innerText === "TBD") {
+                        slot.innerHTML = `<img src="${pImg}" class="w-6 h-6 rounded object-cover"><span class="text-xs">${pName}</span>`;
+                        slot.className = "flex items-center gap-2 p-2 hover:bg-gray-800 cursor-pointer text-white";
+                        break;
+                    }
+                }
+            }
+        };
+    </script>
+</body>
+</html>
