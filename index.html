@@ -2,39 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Image Bracket Generator</title>
-  <link rel="stylesheet" href="styles.css" />
+  <title>BracketHQ‑Style Image Bracket</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="app-container">
-    <h1>Image Bracket Generator</h1>
+  <div class="sidebar">
+    <h2>Bracket Information</h2>
+    <label>Bracket Name</label>
+    <input id="bracketName" type="text" placeholder="Tournament Name" />
+    <label>Bracket Type</label>
+    <input value="Single Elimination" disabled />
+    <label>Game</label>
+    <input id="gameName" type="text" placeholder="Game Title" />
+    <label>Description</label>
+    <textarea id="bracketDesc"></textarea>
 
-    <section class="input-section">
-      <h2>Add Players</h2>
-      <form id="player-form">
-        <div class="form-row">
-          <label>Player Name</label>
-          <input type="text" id="player-name" required />
-        </div>
-        <div class="form-row">
-          <label>Image URL</label>
-          <input type="url" id="player-image" placeholder="https://example.com/image.jpg" required />
-        </div>
-        <button type="submit">Add Player</button>
-      </form>
+    <h3>Add Players</h3>
+    <form id="playerForm">
+      <input id="playerName" type="text" placeholder="Player Name" required />
+      <input id="playerImage" type="file" accept="image/*" required />
+      <button type="submit">Add Player</button>
+    </form>
 
-      <div class="player-list-container">
-        <h3>Players</h3>
-        <ul id="player-list"></ul>
-      </div>
+    <button id="generateBracket">Generate Bracket</button>
+  </div>
 
-      <button id="generate-bracket" class="generate-btn">Generate Bracket</button>
-    </section>
-
-    <section class="bracket-section">
-      <h2>Bracket</h2>
-      <div id="bracket-container"></div>
-    </section>
+  <div class="main">
+    <h1 id="bracketTitle">Bracket</h1>
+    <div id="bracketContainer"></div>
   </div>
 
   <script src="script.js"></script>
