@@ -1,80 +1,128 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BracketHQ Ultimate Workspace</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Siege Tournament Bracket</title>
     <link rel="stylesheet" href="style.css">
-    <script src="script.js" defer></script>
 </head>
-<body class="bg-[#1e1e24] text-gray-100 min-h-screen font-sans flex flex-col selection:bg-blue-600">
 
-    <header class="bg-[#18181c] border-b border-gray-800 p-4 flex justify-between items-center shadow-md">
-        <h1 class="text-xl font-bold tracking-wide text-white">Bracket<span class="text-blue-500">HQ</span> Workspace</h1>
-        <div id="statusBadge" class="text-xs bg-yellow-600/20 text-yellow-400 border border-yellow-500/30 px-2 py-1 rounded">Setup Mode</div>
-    </header>
+<body>
 
-    <div class="flex flex-1 flex-col lg:flex-row">
-        <aside id="sidebarPanel" class="w-full lg:w-80 bg-[#18181c] p-6 border-r border-gray-800 flex flex-col gap-5">
-            <div>
-                <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">1. Add Competitors</h2>
-                <div class="flex flex-col gap-2">
-                    <input type="text" id="playerName" placeholder="Enter Competitor Name..." class="bg-[#26262b] border border-gray-700 rounded p-2 text-sm text-white focus:outline-none focus:border-blue-500">
-                    <label class="bg-[#26262b] border border-gray-700 rounded p-2 text-center cursor-pointer hover:bg-gray-800 transition text-xs text-gray-300">
-                        <span>📸 Upload Logo / Image</span>
-                        <input type="file" id="playerImage" accept="image/*" class="hidden">
-                    </label>
-                    <div id="imagePreview" class="text-xs text-emerald-400 hidden text-center font-medium">✓ Image loaded</div>
-                    <button id="addPlayerBtn" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium p-2 rounded transition">Add To List</button>
-                </div>
-            </div>
+<div class="topbar">
+    <h2>Bracket HQ</h2>
+    <span>Hangover Siege 1v1 Tournament</span>
+</div>
 
-            <div class="flex-1 flex flex-col min-h-[150px]">
-                <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">2. Seed Matchups</h2>
-                <div id="seedZone" class="bg-[#131316] rounded p-2 flex-1 overflow-y-auto border border-gray-800 flex flex-col gap-1 text-sm">
-                    <p class="text-xs text-gray-500 italic p-2 text-center">Add players above to seed matchups.</p>
-                </div>
-            </div>
 
-            <button id="lockBracketBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold p-3 rounded shadow transition w-full">🔒 Start Tournament</button>
-        </aside>
+<div class="bracket">
 
-        <main class="flex-1 p-8 overflow-auto bg-[#121214] flex items-center justify-start min-h-[600px]">
-            <div id="bracketDisplay" class="flex items-center gap-10 min-w-max">
-                <p class="text-gray-500 italic text-center w-full">Configure slots via the left dashboard and click Start.</p>
-            </div>
-        </main>
-    </div>
+    <div class="round">
 
-    <div id="scoreModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-[#18181c] border border-gray-800 rounded-lg max-w-md w-full shadow-2xl overflow-hidden">
-            <div class="border-b border-gray-800 p-4 flex justify-between items-center">
-                <h3 class="font-semibold text-white tracking-wide">Report Scores</h3>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-white font-bold text-xl">&times;</button>
-            </div>
-            <div class="p-6 flex flex-col gap-4">
-                <div id="modalTeam1Row" class="flex items-center justify-between p-3 bg-[#22222a] rounded border border-gray-700/50">
-                    <div class="flex items-center gap-3">
-                        <img id="modalImg1" src="" class="w-8 h-8 rounded object-cover border border-gray-600">
-                        <span id="modalName1" class="font-medium text-sm">Team 1</span>
-                    </div>
-                    <input type="number" id="score1" value="0" min="0" class="w-16 bg-[#131316] border border-gray-600 text-center rounded p-1 font-bold text-white focus:outline-none focus:border-blue-500">
-                </div>
-                <div id="modalTeam2Row" class="flex items-center justify-between p-3 bg-[#22222a] rounded border border-gray-700/50">
-                    <div class="flex items-center gap-3">
-                        <img id="modalImg2" src="" class="w-8 h-8 rounded object-cover border border-gray-600">
-                        <span id="modalName2" class="font-medium text-sm">Team 2</span>
-                    </div>
-                    <input type="number" id="score2" value="0" min="0" class="w-16 bg-[#131316] border border-gray-600 text-center rounded p-1 font-bold text-white focus:outline-none focus:border-blue-500">
-                </div>
-            </div>
-            <div class="bg-[#131316] p-4 flex justify-end gap-3 border-t border-gray-800">
-                <button onclick="closeModal()" class="px-4 py-2 text-sm text-gray-400 hover:text-white transition">Cancel</button>
-                <button id="submitScoresBtn" class="bg-blue-600 hover:bg-blue-700 px-5 py-2 text-sm rounded text-white font-semibold shadow transition">Submit Scores</button>
-            </div>
+        <div class="match">
+            <player-card id="p1"></player-card>
+            <player-card id="p16"></player-card>
         </div>
+
+        <div class="match">
+            <player-card id="p8"></player-card>
+            <player-card id="p9"></player-card>
+        </div>
+
+        <div class="match">
+            <player-card id="p5"></player-card>
+            <player-card id="p12"></player-card>
+        </div>
+
+        <div class="match">
+            <player-card id="p4"></player-card>
+            <player-card id="p13"></player-card>
+        </div>
+
+
+        <div class="match">
+            <player-card id="p3"></player-card>
+            <player-card id="p14"></player-card>
+        </div>
+
+
+        <div class="match">
+            <player-card id="p6"></player-card>
+            <player-card id="p11"></player-card>
+        </div>
+
+
+        <div class="match">
+            <player-card id="p7"></player-card>
+            <player-card id="p10"></player-card>
+        </div>
+
+
+        <div class="match">
+            <player-card id="p2"></player-card>
+            <player-card id="p15"></player-card>
+        </div>
+
+
     </div>
+
+
+    <div class="round second">
+
+        <div class="match">
+            <div class="slot"></div>
+            <div class="slot"></div>
+        </div>
+
+        <div class="match">
+            <div class="slot"></div>
+            <div class="slot"></div>
+        </div>
+
+
+        <div class="match">
+            <div class="slot"></div>
+            <div class="slot"></div>
+        </div>
+
+
+        <div class="match">
+            <div class="slot"></div>
+            <div class="slot"></div>
+        </div>
+
+    </div>
+
+
+
+    <div class="round third">
+
+        <div class="match">
+            <div class="slot"></div>
+            <div class="slot"></div>
+        </div>
+
+        <div class="match">
+            <div class="slot"></div>
+            <div class="slot"></div>
+        </div>
+
+    </div>
+
+
+    <div class="final">
+
+        <div class="match">
+            <div class="slot"></div>
+            <div class="slot"></div>
+        </div>
+
+    </div>
+
+
+
+</div>
+
+
+<script src="script.js"></script>
 
 </body>
 </html>
