@@ -1,194 +1,97 @@
-const playerForm = document.getElementById("player-form");
-const playerNameInput = document.getElementById("player-name");
-const playerImageInput = document.getElementById("player-image");
-const playerListEl = document.getElementById("player-list");
-const generateBtn = document.getElementById("generate-bracket");
-const bracketContainer = document.getElementById("bracket-container");
+const form = document.getElementById("playerForm");
+const bracketContainer = document.getElementById("bracketContainer");
+const generateBtn = document.getElementById("generateBracket");
 
 let players = [];
 let rounds = [];
 
-// Add players
-playerForm.addEventListener("submit", (e) => {
+form.addEventListener("submit", (e) => {
   e.preventDefault();
-  const name = playerNameInput.value.trim();
-  const image = playerImageInput.value.trim();
+  const name = document.getElementById("playerName").value;
+  const file = document.getElementById("playerImage").files[0];
+  if (!file) return;
 
-  if (!name || !image) return;
-
-  players.push({ id: Date.now() + Math.random(), name, image });
-  renderPlayerList();
-  playerForm.reset();
+  const reader = new FileReader();
+  reader.onload = () => {
+    players.push({ id: Date.now(), name, image: reader.result });
+    form.reset();
+  };
+  reader.readAsDataURL(file);
 });
 
-function renderPlayerList() {
-  playerListEl.innerHTML = "";
-  players.forEach((p, index) => {
-    const li = document.createElement("li");
-    li.textContent = `${index + 1}. ${p.name}`;
-    playerListEl.appendChild(li);
-  });
-}
-
-// Generate bracket
 generateBtn.addEventListener("click", () => {
   if (players.length < 2) {
-    alert("You need at least 2 players to generate a bracket.");
+    alert("Add at least two players!");
     return;
   }
-
-  rounds = [];
-  const firstRound = createInitialMatches(players);
-  rounds.push(firstRound);
-
-  // Pre-create empty rounds until we reach the final
-  let currentRound = firstRound;
-  while (currentRound.length > 1) {
-    const nextRound = currentRound.map(() => ({
-      player1: null,
-      player2: null,
-      winner: null,
-    }));
-    rounds.push(nextRound);
-    currentRound = nextRound;
+  rounds = [createMatches(players)];
+  while (rounds[rounds.length - 1].length > 1) {
+    rounds.push(rounds[rounds.length - 1].map(() => ({ p1: null, p2: null, winner: null })));
   }
-
   renderBracket();
 });
 
-// Create initial matches from players list
-function createInitialMatches(playerArray) {
+function createMatches(arr) {
   const matches = [];
-  const shuffled = [...playerArray]; // you can shuffle if you want
-
-  for (let i = 0; i < shuffled.length; i += 2) {
-    const p1 = shuffled[i];
-    const p2 = shuffled[i + 1] || null; // bye if odd number
-
-    matches.push({
-      player1: p1,
-      player2: p2,
-      winner: null,
-    });
+  for (let i = 0; i < arr.length; i += 2) {
+    matches.push({ p1: arr[i], p2: arr[i + 1] || null, winner: null });
   }
-
   return matches;
 }
 
-// Render the whole bracket
 function renderBracket() {
   bracketContainer.innerHTML = "";
-
-  if (!rounds.length) {
-    const p = document.createElement("p");
-    p.className = "empty-text";
-    p.textContent = "No bracket generated yet.";
-    bracketContainer.appendChild(p);
-    return;
-  }
-
-  rounds.forEach((round, roundIndex) => {
-    const roundCol = document.createElement("div");
-    roundCol.className = "round-column";
-
-    const title = document.createElement("div");
-    title.className = "round-title";
-    title.textContent =
-      roundIndex === rounds.length - 1
-        ? "Final"
-        : `Round ${roundIndex + 1}`;
-    roundCol.appendChild(title);
-
-    round.forEach((match, matchIndex) => {
-      const matchCard = document.createElement("div");
-      matchCard.className = "match-card";
-
-      const slot1 = createPlayerSlot(
-        match.player1,
-        roundIndex,
-        matchIndex,
-        "player1",
-        match.winner
-      );
-      const slot2 = createPlayerSlot(
-        match.player2,
-        roundIndex,
-        matchIndex,
-        "player2",
-        match.winner
-      );
-
-      matchCard.appendChild(slot1);
-      matchCard.appendChild(slot2);
-
-      roundCol.appendChild(matchCard);
+  rounds.forEach((round, rIndex) => {
+    const roundDiv = document.createElement("div");
+    roundDiv.className = "round";
+    round.forEach((match, mIndex) => {
+      const matchDiv = document.createElement("div");
+      matchDiv.className = "match";
+      matchDiv.appendChild(createPlayer(match.p1, rIndex, mIndex, "p1", match.winner));
+      matchDiv.appendChild(createPlayer(match.p2, rIndex, mIndex, "p2", match.winner));
+      roundDiv.appendChild(matchDiv);
     });
-
-    bracketContainer.appendChild(roundCol);
+    bracketContainer.appendChild(roundDiv);
   });
 }
 
-// Create a clickable player slot
-function createPlayerSlot(player, roundIndex, matchIndex, positionKey, winner) {
-  const slot = document.createElement("div");
-  slot.className = "player-slot";
-
+function createPlayer(player, rIndex, mIndex, key, winner) {
+  const div = document.createElement("div");
+  div.className = "player";
   if (!player) {
-    slot.classList.add("empty-text");
-    slot.textContent = "BYE";
-    return slot;
+    div.textContent = "BYE";
+    return div;
   }
 
-  if (winner && winner.id === player.id) {
-    slot.classList.add("winner");
-  } else if (winner && winner.id !== player.id) {
-    slot.classList.add("loser");
-  }
-
-  const imgWrapper = document.createElement("div");
-  imgWrapper.className = "player-image-wrapper";
+  if (winner && winner.id === player.id) div.classList.add("winner");
+  else if (winner && winner.id !== player.id) div.classList.add("loser");
 
   const img = document.createElement("img");
   img.src = player.image;
-  img.alt = player.name;
+  const name = document.createElement("span");
+  name.textContent = player.name;
 
-  imgWrapper.appendChild(img);
+  div.appendChild(img);
+  div.appendChild(name);
 
-  const nameEl = document.createElement("div");
-  nameEl.className = "player-name";
-  nameEl.textContent = player.name;
-
-  slot.appendChild(imgWrapper);
-  slot.appendChild(nameEl);
-
-  slot.addEventListener("click", () => {
-    handleWinnerSelection(roundIndex, matchIndex, positionKey);
+  div.addEventListener("click", () => {
+    handleWinner(rIndex, mIndex, key);
   });
 
-  return slot;
+  return div;
 }
 
-// Handle winner selection and propagate to next round
-function handleWinnerSelection(roundIndex, matchIndex, positionKey) {
-  const match = rounds[roundIndex][matchIndex];
-  const selectedPlayer = match[positionKey];
+function handleWinner(rIndex, mIndex, key) {
+  const match = rounds[rIndex][mIndex];
+  const selected = match[key];
+  if (!selected) return;
+  match.winner = selected;
 
-  if (!selectedPlayer) return;
-
-  match.winner = selectedPlayer;
-
-  // Put winner into next round
-  const nextRoundIndex = roundIndex + 1;
-  if (nextRoundIndex < rounds.length) {
-    const nextMatchIndex = Math.floor(matchIndex / 2);
-    const nextMatch = rounds[nextRoundIndex][nextMatchIndex];
-
-    if (matchIndex % 2 === 0) {
-      nextMatch.player1 = selectedPlayer;
-    } else {
-      nextMatch.player2 = selectedPlayer;
-    }
+  const nextRound = rounds[rIndex + 1];
+  if (nextRound) {
+    const nextMatch = nextRound[Math.floor(mIndex / 2)];
+    if (mIndex % 2 === 0) nextMatch.p1 = selected;
+    else nextMatch.p2 = selected;
   }
-
   renderBracket();
 }
