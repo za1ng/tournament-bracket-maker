@@ -1,66 +1,132 @@
-/* Tournament Layout & Pure CSS Connecting Lines */
-.round-column {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    position: relative;
-    width: 240px;
-    height: 100%;
+*{
+    box-sizing:border-box;
+    font-family:Arial;
 }
 
-.match-box {
-    position: relative;
-    background: #18181c;
-    border: 1px solid #2e2e38;
-    border-radius: 4px;
-    width: 220px;
-    z-index: 10;
+
+body{
+
+    margin:0;
+    background:#17191e;
+    color:white;
+    overflow:auto;
+
 }
 
-/* Horizontal line leaving the right side of every match */
-.match-box::after {
-    content: '';
-    position: absolute;
-    right: -20px;
-    top: 50%;
-    width: 20px;
-    height: 2px;
-    background-color: #4b5563; 
+
+
+.topbar{
+
+    height:60px;
+    background:#30333a;
+    display:flex;
+    align-items:center;
+    gap:40px;
+    padding-left:25px;
+
 }
 
-/* Hide outgoing line on the final championship node */
-.final-champ-node::after { 
-    display: none; 
+
+.topbar h2{
+
+    margin:0;
 }
 
-/* Vertical line bracket on the LEFT side of every match box (except first column) */
-.round-column:not(:first-child) .match-box::before {
-    content: '';
-    position: absolute;
-    left: -20px;
-    top: -50%;
-    bottom: -50%;
-    width: 2px;
-    background-color: #4b5563;
-    z-index: 1;
+
+.bracket{
+
+    display:flex;
+    gap:100px;
+    padding:60px;
+
 }
 
-/* Adjust the left brackets to center cleanly around pairings */
-.round-column:not(:first-child) .match-box:nth-child(odd)::before {
-    top: 50%;
-    bottom: -50%;
-    height: calc(100% + 20px); 
-    border-top: 2px solid #4b5563;
-    border-left: 2px solid #4b5563;
-    background: none;
+
+.round{
+
+    display:flex;
+    flex-direction:column;
+    justify-content:space-around;
+    height:900px;
+
 }
 
-.round-column:not(:first-child) .match-box:nth-child(even)::before {
-    top: -50%;
-    bottom: 50%;
-    height: calc(100% + 20px);
-    border-bottom: 2px solid #4b5563;
-    border-left: 2px solid #4b5563;
-    background: none;
-    transform: translateY(-50%);
+
+
+.match{
+
+    width:180px;
+    height:90px;
+    position:relative;
+
+}
+
+
+player-card,
+.slot{
+
+    display:block;
+    height:40px;
+    border-bottom:2px solid #ddd;
+
+}
+
+
+
+.player{
+
+    display:flex;
+    align-items:center;
+    gap:10px;
+    height:40px;
+
+}
+
+
+
+.player img{
+
+    width:35px;
+    height:35px;
+    border-radius:50%;
+    object-fit:cover;
+
+}
+
+
+.player span{
+
+    font-size:15px;
+
+}
+
+
+
+.eliminated img{
+
+    filter:grayscale(100%);
+
+}
+
+
+
+.second{
+
+    padding-top:80px;
+
+}
+
+
+.third{
+
+    padding-top:200px;
+
+}
+
+
+.final{
+
+    display:flex;
+    align-items:center;
+
 }
